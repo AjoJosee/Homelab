@@ -1,0 +1,362 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 30
+            },
+            {},
+            {}
+          ]
+        },
+        "filters": {}
+      },
+      "id": "5bbbef02-3d86-4cab-9231-f8b706b19f26",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "position": [
+        -736,
+        704
+      ],
+      "typeVersion": 1.2,
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LwwdEsQJ7TtHLEqH",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Tool to read all existing gmail labels",
+        "resource": "label",
+        "returnAll": true
+      },
+      "id": "b6383f7a-832e-40ad-9188-d164a62f0e51",
+      "name": "Gmail - read labels",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        -304,
+        928
+      ],
+      "webhookId": "d8ec9401-a9ff-4fe2-9c1e-5a8036cd96c9",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LwwdEsQJ7TtHLEqH",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Tool to read a specific message based on the message ID",
+        "operation": "get",
+        "messageId": "={{ $fromAI('gmail_message_id', 'id of the gmail message, like 1944fdc33f544369', 'string') }}"
+      },
+      "id": "bbeb392a-247a-4bf3-9f0f-538f6fbc45af",
+      "name": "Gmail - get message",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        -128,
+        928
+      ],
+      "webhookId": "d8ec9401-a9ff-4fe2-9c1e-5a8036cd96c9",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LwwdEsQJ7TtHLEqH",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Tool to add label to message",
+        "operation": "addLabels",
+        "messageId": "={{ $fromAI('gmail_message_id') }}",
+        "labelIds": "={{ $fromAI('gmail_categories', 'array of label ids') }}"
+      },
+      "id": "e9043834-248b-497a-ae2e-9d5295ea78b1",
+      "name": "Gmail - add label to message",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        48,
+        944
+      ],
+      "webhookId": "7a87b026-1c6e-40e1-a062-aefdd1af1585",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LwwdEsQJ7TtHLEqH",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Tool to create a new label, only use if label does not already exist",
+        "resource": "label",
+        "operation": "create",
+        "name": "={{ $fromAI('new_label_name', 'new label name', 'string' ) }} ",
+        "options": {}
+      },
+      "id": "6673f611-5c70-4773-93e3-0f6ee6f988b6",
+      "name": "Gmail - create label",
+      "type": "n8n-nodes-base.gmailTool",
+      "position": [
+        272,
+        928
+      ],
+      "webhookId": "d8ec9401-a9ff-4fe2-9c1e-5a8036cd96c9",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "LwwdEsQJ7TtHLEqH",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Label the email based on the details below:\n{{ JSON.stringify($json) }}",
+        "options": {
+          "systemMessage": "Objective\n\nAutomatically organize every incoming Gmail message by assigning the most appropriate existing label. Only create a new label when no existing label reasonably fits.\n\nAvailable Tools\n\n- Get message\n- Read all labels\n- Create label\n- Assign label to message\n\nWorkflow\n\n1. Retrieve the email.\n2. Retrieve all existing Gmail labels.\n3. Determine the best existing label.\n4. Assign that label.\n5. Only if no existing label is suitable, create a new label and then assign it.\n\nLabel Selection Rules\n\nAnalyze:\n- Subject\n- Sender\n- Recipient\n- Email body\n- Keywords\n- Context and intent of the email\n\nAlways prefer an existing label whenever it is reasonably applicable.\n\nUse semantic matching, not just exact name matching. For example:\n- \"GitHub PR\" matches \"GitHub\"\n- \"AWS Billing\" matches \"AWS\"\n- \"Internship Offer\" matches \"Career\"\n- \"Amazon Order\" matches \"Shopping\"\n\nDo NOT create a new label simply because the wording differs.\n\nIf multiple labels fit, choose the most specific one.\n\nNever assign multiple labels unless they are already intended to be used together.\n\nLabel Creation Rules\n\nCreate a new label ONLY if:\n- No existing label accurately represents the email.\n- The email represents a recurring category rather than a one-off topic.\n\nAvoid creating labels that are:\n- Synonyms of existing labels\n- Minor spelling variations\n- Singular/plural variants\n- Slightly different wording\n- Temporary or overly specific\n\nNew labels should:\n- Follow the naming style of existing labels.\n- Match capitalization and separators already in use.\n- Be concise (typically 1–3 words).\n\nHierarchy Rules\n\nAlways create new labels as sublabels.\n\nIf an appropriate parent label already exists:\n    Parent/New Label\n\nExamples:\nProjects/Alpha\nFinance/Taxes\nShopping/Amazon\n\nIf no suitable parent exists:\n1. Create the parent label:\n    AI\n2. Create:\n    AI/New Label\n\nNever create a top-level label unless it is \"AI\".\n\nInbox Handling\n\nKeep the email in Inbox if it is:\n- Personal\n- Important\n- Work-related\n- Requires action\n- Time-sensitive\n- Transactional\n- Receipts or confirmations\n- Shipping updates\n- Security alerts\n\nRemove the Inbox label if the email is clearly low priority, including:\n- Advertisements\n- Promotions\n- Marketing newsletters\n- Sales campaigns\n- Coupon offers\n- Spam-like promotional emails\n- \"Reclame\" emails\n\nExamples\n\n\"Project Alpha Update\"\n→ Assign Projects/Alpha if it exists.\n\n\"GitHub Pull Request Review\"\n→ Assign GitHub (do not create GitHub PR).\n\n\"AWS Monthly Invoice\"\n→ Assign AWS or Finance/Billing if either exists.\n\n\"Amazon Shipping Update\"\n→ Assign Shopping/Amazon if available.\n\n\"New Vendor Inquiry\"\n→ If no suitable label exists:\n    AI/Vendor Inquiry\nor\n    Business/Vendor Inquiry\nif Business already exists.\n\nSuccess Criteria\n\nEvery email must end with exactly one appropriate label assigned.\n\nCreate a new label only as a last resort after considering all existing labels semantically.\n\nNever create duplicate, synonymous, or unnecessarily specific labels.",
+          "maxIterations": 8
+        }
+      },
+      "id": "ed960990-3d07-4572-a034-bbff5cb10e91",
+      "name": "Gmail labelling agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -448,
+        704
+      ],
+      "notesInFlow": true,
+      "retryOnFail": false,
+      "typeVersion": 1.7,
+      "onError": "continueErrorOutput",
+      "notes": "Objective:\nAutomatically categorize incoming emails based on existing Gmail labels or create a new label if none match.\n\nTools:\n- Get message\n- Read all labels\n- Create label\n- Assign label to message\n\nInstructions:\n\nLabel Matching:\n\nAnalyze the email's subject, sender, recipient, keywords, and content.\nCompare with existing Gmail labels to find the most relevant match.\nLabel Assignment:\n\nAssign the email to the most appropriate existing label.`\nRemove the inbox label if the email is of less importance (like ads, promotions, aka \"Reclame\"), keep normal and important emails in the inbox.\nIf no suitable label exists, create a new label based on the existing labels. Try reusing existing labels as much as possible. Always create a label as a sublabel, if no label applies, if the main label already exists, create the new label under the existing label, if no main label exists, create the label AI and create the new label under this label.\nLabel Creation:\n\nEnsure new labels align with the structure of existing ones, including capitalization, delimiters, and prefixes.\nExamples:\n\nIf the email subject is \"Project Alpha Update,\" assign to [Project Alpha] if it exists.\nFor \"New Vendor Inquiry,\" create \"Vendor Inquiry\" if no relevant label exists.\nOutcome:\nEmails are consistently categorized under the appropriate or newly created labels, maintaining Gmail's organizational structure."
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.id }}"
+      },
+      "id": "4cb79498-ac02-4ccb-9b75-ea49799f4608",
+      "name": "Window Buffer Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -448,
+        928
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "id": "da43fec6-57c5-441d-89ec-1ef42acba42a",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        -608,
+        704
+      ],
+      "webhookId": "2066b863-4526-40cf-90aa-82229895a73c",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "content": "## Gmail trigger\nPoll Gmail every x minutes, trigger when a new email is received.\n\n- Gmail API"
+      },
+      "id": "7a21ed4e-bf87-4de3-8e94-a0b0a4c71be9",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1024,
+        672
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Gmail labelling agent\n- Read the message\n- Read existing labels\n- Create a new label if needed\n- Assign label to message\n\n----\n\nObjective:\nAutomatically categorize incoming emails based on existing Gmail labels or create a new label if none match.\n\nTools:\n- Get message\n- Read all labels\n- Create label\n- Assign label to message\n\nInstructions:\n\nLabel Matching:\n\nAnalyze the email's subject, sender, recipient, keywords, and content.\nCompare with existing Gmail labels to find the most relevant match.\nLabel Assignment:\n\nAssign the email to the most appropriate existing label.`\nRemove the inbox label if the email is of less importance (like ads, promotions, aka \"Reclame\"), keep normal and important emails in the inbox.\nIf no suitable label exists, create a new label based on the existing labels. Try reusing existing labels as much as possible. Always create a label as a sublabel, if no label applies, if the main label already exists, create the new label under the existing label, if no main label exists, create the label AI and create the new label under this label.\nLabel Creation:\n\nEnsure new labels align with the structure of existing ones, including capitalization, delimiters, and prefixes.\nExamples:\n\nIf the email subject is \"Project Alpha Update,\" assign to [Project Alpha] if it exists.\nFor \"New Vendor Inquiry,\" create \"Vendor Inquiry\" if no relevant label exists.\nOutcome:\nEmails are consistently categorized under the appropriate or newly created labels, maintaining Gmail's organizational structure.",
+        "height": 840,
+        "width": 780
+      },
+      "id": "66496d4a-0333-4dde-af18-34d4bc1af998",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Gmail API\n- Add credentials ",
+        "width": 440
+      },
+      "id": "56e71e00-b0ae-46f4-a0fd-9d58cb53dbc0",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -224,
+        1120
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## OpenAI\n- Add credentials ",
+        "width": 440
+      },
+      "id": "ce22f828-3da1-4c25-b087-80a8238c6ea4",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -960,
+        1040
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -592,
+        912
+      ],
+      "id": "1647cc04-2dfe-495c-89af-cd6219db3640",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "cCZhGBudKGV3U0Dc",
+          "name": "Ollama account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Gmail labelling agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - get message": {
+      "ai_tool": [
+        [
+          {
+            "node": "Gmail labelling agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - read labels": {
+      "ai_tool": [
+        [
+          {
+            "node": "Gmail labelling agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - create label": {
+      "ai_tool": [
+        [
+          {
+            "node": "Gmail labelling agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Gmail labelling agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail - add label to message": {
+      "ai_tool": [
+        [
+          {
+            "node": "Gmail labelling agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Gmail labelling agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "7e90db72-80b6-437f-aec3-7931fddf769e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e1c8a7e98fc6c9088303d84be3de6f398ad63b3f46bcf6d4870dc6c7493ed916"
+  },
+  "nodeGroups": [],
+  "id": "BJxBROxT7ANpgTdh",
+  "tags": []
+}
