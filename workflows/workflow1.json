@@ -1,0 +1,76 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "dd520c55-ae50-438b-a761-6c23227a3dc2",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "llama3.2:latest",
+          "mode": "list",
+          "cachedResultName": "llama3.2:latest"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Summarize the benefits of self-hosted cloud architecture in 3 bullet points."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "1095434c-4b65-42d1-9d62-13676a9a0916",
+      "name": "Message a model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "cCZhGBudKGV3U0Dc",
+          "name": "Ollama account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d5ef4f67-0784-4bb0-aa9b-cfe856218e57",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e1c8a7e98fc6c9088303d84be3de6f398ad63b3f46bcf6d4870dc6c7493ed916"
+  },
+  "nodeGroups": [],
+  "id": "XLNDYq9p1PNWt5P5",
+  "tags": []
+}

@@ -3,3 +3,7 @@ data/
 
 # Ignore real secrets and sensitive keys
 .env
+
+# Ignore temporary files
+*.tmp
+tempyaml.txt

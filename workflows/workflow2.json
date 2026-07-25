@@ -1,0 +1,132 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d503b2c9-f5ea-420b-a4dd-7537eb32917e",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "bucketName": "n8n-files",
+        "fileKey": "random_anime_story.txt"
+      },
+      "type": "n8n-nodes-base.s3",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "28cb6b17-ef74-401d-a4f2-9e05915a2e13",
+      "name": "Download a file",
+      "credentials": {
+        "s3": {
+          "id": "DryDqhOXICxfqVEQ",
+          "name": "S3 account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "f2bd48e5-26a8-43f8-8004-3aa29ceafc7b",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "llama3.2:latest",
+          "mode": "list",
+          "cachedResultName": "llama3.2:latest"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Expand the story and make it more funny. {{ $json.data }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.ollama",
+      "typeVersion": 1,
+      "position": [
+        624,
+        0
+      ],
+      "id": "5ff728d9-8fd2-46cb-b2d4-4a7a827441a8",
+      "name": "Message a model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "cCZhGBudKGV3U0Dc",
+          "name": "Ollama account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download a file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "da938347-bbf7-406d-b9e8-97aefeb53c11",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e1c8a7e98fc6c9088303d84be3de6f398ad63b3f46bcf6d4870dc6c7493ed916"
+  },
+  "nodeGroups": [],
+  "id": "HqT6suSwnBfXwWxP",
+  "tags": []
+}
