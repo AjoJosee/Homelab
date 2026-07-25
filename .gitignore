@@ -1,0 +1,5 @@
+# Ignore all runtime databases, certificates, and logs
+data/
+
+# Ignore real secrets and sensitive keys
+.env
