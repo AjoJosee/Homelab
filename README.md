@@ -96,7 +96,7 @@ CPU/GPU requirements. Ollama can run without a GPU, but model performance will
 vary substantially by hardware.
 
 ## Quick start
-
+Install everything docker,  postgres, etc. You can also replace docker with podman if comfortable
 ### 1. Clone the repository
 
 ```bash
@@ -104,7 +104,7 @@ git clone https://github.com/AjoJosee/Homelab.git
 cd Homelab
 ```
 
-### 2. Create the external Docker network (U gotta have docker installed btw)
+### 2. Create the external Docker network 
 
 The Compose file declares `proxy` as an external network, so Docker Compose
 will not create it automatically:
