@@ -510,8 +510,4 @@ workflows. It does not include:
 
 Those are appropriate next steps for a more reliable long-running deployment.
 
-## License
-
-No license file is currently included. Until a license is added, the contents
-should be treated as available for viewing but without an explicit license
-grant for reuse or redistribution.
+The workflows provided are just me trying out n8n. You can completely ignore that.
