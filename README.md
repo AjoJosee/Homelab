@@ -104,7 +104,7 @@ git clone https://github.com/AjoJosee/Homelab.git
 cd Homelab
 ```
 
-### 2. Create the external Docker network
+### 2. Create the external Docker network (U gotta have docker installed btw)
 
 The Compose file declares `proxy` as an external network, so Docker Compose
 will not create it automatically:
